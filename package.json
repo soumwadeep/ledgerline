@@ -1,0 +1,32 @@
+{
+  "name": "ledgerline",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A deterministic guardrail between AI agents and Airwallex money movement.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev -p 3111",
+    "build": "next build",
+    "start": "next start -p 3111",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "audit:demo": "tsx scripts/demo-run.ts"
+  },
+  "dependencies": {
+    "next": "15.5.4",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.2",
+    "@types/react": "19.0.2",
+    "@types/react-dom": "19.0.2",
+    "tsx": "4.19.2",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
