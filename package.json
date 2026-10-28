@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "audit:demo": "tsx scripts/demo-run.ts"
+    "probe": "tsx scripts/probe.ts"
   },
   "dependencies": {
     "next": "^15.5.28",
