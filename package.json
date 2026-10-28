@@ -14,7 +14,7 @@
     "audit:demo": "tsx scripts/demo-run.ts"
   },
   "dependencies": {
-    "next": "15.5.4",
+    "next": "^15.5.28",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },
@@ -22,9 +22,9 @@
     "@types/node": "22.10.2",
     "@types/react": "19.0.2",
     "@types/react-dom": "19.0.2",
-    "tsx": "4.19.2",
+    "tsx": "^4.23.15",
     "typescript": "5.7.2",
-    "vitest": "2.1.8"
+    "vitest": "^3.2.7"
   },
   "engines": {
     "node": ">=20"

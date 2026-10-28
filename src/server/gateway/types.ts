@@ -47,6 +47,12 @@ export interface MoneyGateway {
   /** Human readable identity of the account in use, for the UI header. */
   describe(): Promise<string>;
   listBalances(ctx?: GatewayContext): Promise<Record<Currency, number>>;
+  /**
+   * Return an account able to receive funds in this currency, creating one if
+   * the sandbox has none. The simulation has no account objects, so it returns
+   * a stable placeholder.
+   */
+  ensureGlobalAccount(currency: Currency): Promise<{ id: string; note: string }>;
   fxRate(sell: Currency, buy: Currency): Promise<number>;
   quote(input: QuoteInput): Promise<QuoteRecord>;
   /** Returns the conversion id. `requestId` is the idempotency key. */

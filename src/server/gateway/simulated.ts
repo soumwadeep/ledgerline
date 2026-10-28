@@ -37,6 +37,10 @@ export class SimulatedGateway implements MoneyGateway {
     return rate(sell, buy);
   }
 
+  async ensureGlobalAccount(currency: Currency): Promise<{ id: string; note: string }> {
+    return { id: `sim_ga_${currency}`, note: "simulation has no account objects. Placeholder used" };
+  }
+
   async quote(input: QuoteInput): Promise<QuoteRecord> {
     const r = rate(input.sellCurrency, input.buyCurrency);
     // Registration is the caller's job, not the gateway's, so that the engine

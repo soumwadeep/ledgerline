@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { store } from "@/server/state/store";
 import { getEngine } from "@/server/runtime";
 
 export const dynamic = "force-dynamic";
@@ -22,8 +21,10 @@ export async function POST(request: Request) {
   }
 
   const engine = getEngine();
-  const state = store.get();
-  const accountId = process.env.AIRWALLEX_GLOBAL_ACCOUNT_ID ?? "sim_account";
+  // Ask the gateway for an account that can receive this currency rather than
+  // requiring a hand configured id. On the live sandbox that creates one if the
+  // desk does not already have it.
+  const { id: accountId, note } = await engine.gateway.ensureGlobalAccount(currency);
 
   try {
     const result = await engine.gateway.deposit({
@@ -32,8 +33,8 @@ export async function POST(request: Request) {
       currency,
       payerName: body.payerName ?? "Customer settlement",
     });
-    engine.ledger.append("deposit", { currency, amount, payerName: body.payerName ?? "Customer settlement", ...result });
-    return NextResponse.json({ ok: true, detail: result.note, currency, amount });
+    engine.ledger.append("deposit", { currency, amount, payerName: body.payerName ?? "Customer settlement", accountId, ...result });
+    return NextResponse.json({ ok: true, detail: `${note}. ${result.note}`, currency, amount });
   } catch (error) {
     return NextResponse.json({ ok: false, detail: error instanceof Error ? error.message : "deposit failed" }, { status: 502 });
   }

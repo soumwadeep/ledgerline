@@ -50,6 +50,14 @@ export async function GET(request: Request) {
   await record("authentication", "POST /api/v1/authentication/login", async () => "token acquired or simulation. Valid 30 minutes on the live sandbox");
   await record("balances", "GET /api/v1/balances/current", async () => JSON.stringify(await gateway.listBalances()));
   await record(
+    "global account",
+    "GET /api/v1/global_accounts then POST /api/v1/global_accounts/create",
+    async () => {
+      const account = await gateway.ensureGlobalAccount("USD");
+      return `${account.id}. ${account.note}`;
+    },
+  );
+  await record(
     "fx rate",
     "GET /api/v1/fx/rates/current",
     async () => `SGD/EUR ${await gateway.fxRate("SGD", "EUR")}. FX calls must not carry x-api-version`,

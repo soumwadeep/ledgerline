@@ -25,6 +25,24 @@ import {
 const BASE = process.env.AIRWALLEX_BASE_URL ?? "https://api.sandbox.airwallex.com";
 const API_VERSION = process.env.AIRWALLEX_API_VERSION ?? "2019-07-12";
 
+/**
+ * Sandbox global accounts are issued by issuing bank country, so a currency
+ * needs a jurisdiction that will actually give a local account for it. BE is
+ * rejected by the sandbox, which is the kind of thing you only learn once.
+ */
+const COUNTRY_FOR_CURRENCY: Record<string, string> = {
+  USD: "US",
+  EUR: "DE",
+  GBP: "GB",
+  SGD: "SG",
+  AUD: "AU",
+  HKD: "HK",
+  CNY: "CN",
+  JPY: "JP",
+  NZD: "NZ",
+  CAD: "CA",
+};
+
 interface CachedToken {
   token: string;
   expiresAt: number;
@@ -121,6 +139,36 @@ export class AirwallexGateway implements MoneyGateway {
       out[entry.currency] = amount;
     }
     return out;
+  }
+
+  async ensureGlobalAccount(currency: Currency): Promise<{ id: string; note: string }> {
+    // Guide: country_code is the account country, not the currency, and BE is
+    // rejected. required_features is an array of objects, not strings.
+    const country = COUNTRY_FOR_CURRENCY[currency];
+    if (!country) {
+      throw new GatewayError(
+        `no sandbox country mapping for ${currency}. Add it to COUNTRY_FOR_CURRENCY`,
+        400,
+        "unmapped_currency",
+      );
+    }
+
+    const listed = await this.call<{ items?: Array<{ id?: string; currency?: string; status?: string }> }>(
+      "/api/v1/global_accounts",
+    );
+    const existing = (listed.items ?? []).find((a) => a.currency === currency && a.status !== "CLOSED");
+    if (existing?.id) return { id: existing.id, note: `reusing ${existing.id} (${existing.status})` };
+
+    const created = await this.call<{ id?: string; status?: string }>("/api/v1/global_accounts/create", {
+      method: "POST",
+      body: {
+        request_id: `req_ga_${currency}_${Date.now()}`,
+        country_code: country,
+        required_features: [{ currency, transfer_method: "LOCAL" }],
+      },
+    });
+    if (!created.id) throw new GatewayError("global account created without an id", 500, "account_no_id");
+    return { id: created.id, note: `created ${created.id} in ${country} (${created.status ?? "PENDING"})` };
   }
 
   async fxRate(sell: Currency, buy: Currency): Promise<number> {

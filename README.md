@@ -114,3 +114,12 @@ Chargebacks, card issuing and agentic commerce are out of scope by choice. Those
 - The scenario data in `src/server/state/store.ts` is synthetic. No real company, payee or balance appears anywhere.
 - Everything is in memory by design. The tamper evidence the project claims lives in the hash chain, not in a database.
 - Built solo by Soumwadeep Guha.
+
+## Security posture
+
+`npm audit` reports no advisories in anything that ships. The runtime dependency is Next 15.5.28, which is the patched line for CVE-2025-66478.
+
+One moderate advisory remains against `@vitest/mocker`, which is a dev-only test dependency and is not reachable from the running app. Clearing it requires vitest 5, which cannot resolve against the current peer set. It is listed here rather than hidden.
+
+Credentials are read from the environment and never leave the server process. The browser never sees the client id or the API key: every Airwallex call goes through a route handler. `.env.local` is git ignored, and no key belongs in an issue, a screenshot, or a chat window.
+
